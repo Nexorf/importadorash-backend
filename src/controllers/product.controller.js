@@ -1,0 +1,91 @@
+import Producto from "../models/product.model.js"
+
+const ProductController = {
+    getProducts: async (req, res) => {
+        try {
+            const productos = await Producto.find().sort({id: 1});
+            res.json(productos);
+        } catch (error) {
+            console.error('Error al obtener productos:', error);
+            res.status(500).json({error: 'Error al obtener productos'});
+        }
+    },
+
+    createProduct: async (req, res) => {
+        try {
+            if (Array.isArray(req.body)) {
+                // Si es un array, reemplazar todos los productos
+                await Producto.deleteMany({});
+                const productos = await Producto.insertMany(req.body);
+                res.json({success: true, count: productos.length});
+            } else {
+                // Si es un objeto, crear o actualizar un producto
+                const producto = req.body;
+                if (producto.id) {
+                    // Actualizar producto existente
+                    const updatedProducto = await Producto.findOneAndUpdate(
+                        {id: producto.id},
+                        producto,
+                        {new: true, upsert: true}
+                    );
+                    res.json({success: true, producto: updatedProducto});
+                } else {
+                    // Crear nuevo producto
+                    const newProducto = new Producto(producto);
+                    await newProducto.save();
+                    res.json({success: true, producto: newProducto});
+                }
+            }
+        } catch (error) {
+            console.error('Error al guardar productos:', error);
+            res.status(500).json({error: 'Error al guardar productos'});
+        }
+    },
+
+    getProductById: async (req, res) => {
+        try {
+            const producto = await Producto.findOne({id: parseInt(req.params.id)});
+            if (producto) {
+                res.json(producto);
+            } else {
+                res.status(404).json({error: 'Producto no encontrado'});
+            }
+        } catch (error) {
+            console.error('Error al obtener producto:', error);
+            res.status(500).json({error: 'Error al obtener producto'});
+        }
+    },
+
+    updateProduct: async (req, res) => {
+        try {
+            const updatedProducto = await Producto.findOneAndUpdate(
+                {id: parseInt(req.params.id)},
+                req.body,
+                {new: true}
+            );
+            if (updatedProducto) {
+                res.json({success: true, producto: updatedProducto});
+            } else {
+                res.status(404).json({error: 'Producto no encontrado'});
+            }
+        } catch (error) {
+            console.error('Error al actualizar producto:', error);
+            res.status(500).json({error: 'Error al actualizar producto'});
+        }
+    },
+
+    deleteProduct: async (req, res) => {
+        try {
+            const result = await Producto.findOneAndDelete({id: parseInt(req.params.id)});
+            if (result) {
+                res.json({success: true});
+            } else {
+                res.status(404).json({error: 'Producto no encontrado'});
+            }
+        } catch (error) {
+            console.error('Error al eliminar producto:', error);
+            res.status(500).json({error: 'Error al eliminar producto'});
+        }
+    }
+};
+export default ProductController;
