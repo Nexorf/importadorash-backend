@@ -104,61 +104,14 @@ const router = Router();
  *         description: Producto eliminado
  *       404:
  *         description: Producto no encontrado
- *
- * components:
- *   schemas:
- *     Product:
- *       type: object
- *       required:
- *         - nombre
- *         - precio
- *       properties:
- *         id:
- *           type: number
- *           example: 1
- *         nombre:
- *           type: string
- *           example: "Laptop Pro"
- *         descripcion:
- *           type: string
- *           example: "Una laptop potente"
- *         precio:
- *           type: number
- *           example: 1200
- *         categoria:
- *           type: string
- *           example: "Electrónicos"
- *         stock:
- *           type: number
- *           example: 10
- *         destacado:
- *           type: boolean
- *           example: true
- *         rating:
- *           type: number
- *           example: 4.5
- *         especificaciones:
- *           type: array
- *           items:
- *             type: string
- *           example: ["8GB RAM", "SSD 256GB"]
- *         marca:
- *           type: string
- *           example: "TechBrand"
- *         garantia:
- *           type: string
- *           example: "2 años"
- *         fechaCreacion:
- *           type: string
- *           format: date-time
- *           example: "2023-01-01T00:00:00Z"
+
  */
 
 // Rutas CORREGIDAS
 router.get("/", ProductController.getProducts);
 router.get("/:id", ProductController.getProductById);
 router.post("/", ProductController.createProduct);  // Cambiado a router.post
-router.put("/:id", ProductController.updateProduct);
+// router.put("/:id", ProductController.updateProduct);
 router.delete("/:id", ProductController.deleteProduct);
 
 
