@@ -2,6 +2,21 @@ import {Router} from "express";
 import CategoryController from "../controllers/category.controller.js";
 
 const router = Router();
+
+router.get('/', CategoryController.getAllCategory)
+router.get('/id/:id', CategoryController.getCategoryById)
+router.get('/name/:name', CategoryController.getCategoryByName)
+router.get('/daughters/:id', CategoryController.getDaughtersCategoryById)
+router.get('/tree', CategoryController.getTreeCategories)
+
+
+router.post('/', CategoryController.createCategory);
+router.delete('/:id', CategoryController.deleteCategory);
+
+// router.get('/parent/:parentId', CategoryController.getSubCategories)
+
+export default router;   // 👈 exportación por defecto
+
 /**
  * @openapi
  * tags:
@@ -66,12 +81,6 @@ const router = Router();
  */
 
 
-router.get('/', CategoryController.getAllCategory)
-router.post('/', CategoryController.createCategory);
-router.get('/parent/:parentId', CategoryController.getSubCategories)
-
-
-
 /**
  * @openapi
  * components:
@@ -87,10 +96,5 @@ router.get('/parent/:parentId', CategoryController.getSubCategories)
  *         name:
  *           type: string
  *           example: "Electronica"
- *         category_father_id:
- *           type: number
- *           example: 1
-
  */
 
-export default router;   // 👈 exportación por defecto

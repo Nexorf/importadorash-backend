@@ -1,5 +1,7 @@
 import Category from '../models/category.model.js';
-import mongoose from 'mongoose';
+import SubCategory from "../models/subcategory.model.js";
+import Producto from "../models/product.model.js";
+import Product from "../models/product.model.js";
 
 const CategoryController = {
 
@@ -12,102 +14,254 @@ const CategoryController = {
         }
     },
 
-    getSubCategories: async (req, res) => {
-        try {
-            const { category_father_id } = req.params;
-
-            // 1. Validar parámetro
-            if (category_father_id === undefined) {
-                return res.status(400).json({ error: 'Se requiere category_father_id' });
-            }
-
-            // 2. Crear filtro
-            let filter;
-            if (category_father_id === 'null' || category_father_id === '0') {
-                filter = { category_father_id: null }; // Categorías raíz
-            } else {
-                // Validar que el ID sea un ObjectId válido
-                if (!mongoose.Types.ObjectId.isValid(category_father_id)) {
-                    return res.status(400).json({ error: 'ID de categoría inválido' });
-                }
-                filter = { category_father_id: new mongoose.Types.ObjectId(category_father_id) };
-            }
-
-            // 3. Buscar subcategorías (con populate opcional)
-            const subCategories = await Category.find(filter)
-                .populate({
-                    path: 'category_father_id',
-                    select: 'name' // Solo trae el nombre del padre
-                });
-
-            // 4. Verificar resultados
-            if (!subCategories.length) {
-                return res.status(200).json([]); // Array vacío si no hay coincidencias
-            }
-
-            res.status(200).json(subCategories);
-
-        } catch (err) {
-            console.error('Error en getSubCategories:', err);
-            res.status(500).json({
-                error: 'Error al obtener subcategorías',
-                details: process.env.NODE_ENV === 'development' ? err.message : undefined
-            });
-        }
-    },
-
-
     createCategory: async (req, res) => {
-        try{
-            if(Array.isArray(req.body)) {
+        try {
+            if (Array.isArray(req.body)) {
                 await Category.deleteMany({});
                 const category = await Category.insertMany(req.body);
                 res.json(category);
-            }else{
+            } else {
                 const category = req.body;
-                if(category.id) {
-                    const updatedCategory = await Category.findOneAndUpdate(
-                        {id: category.id},
-                        category,
-                        {new: true, upsert: true}
-                    );
-                    res.json({success: true, category: updatedCategory});
-                }else{
-                    const newCategory = new Category(category);
-                    await newCategory.save();
-                    res.json({success: true, category: newCategory});
+                const categories = await Category.findOne({
+                    name: category.name
+                })
+                if (!categories) {
+                    if (category.id) {
+                        const updatedCategory = await Category.findOneAndUpdate(
+                            {id: category.id},
+                            category,
+                            {new: true, upsert: true}
+                        );
+                        res.json({success: true, category: updatedCategory});
+                    } else {
+                        if (!categories) {
+                            console.error('Categoria no existe');
+                            const newCategory = new Category(category);
+                            await newCategory.save();
+                            res.json({success: true, category: newCategory});
+
+                        } else {
+                            res.json({error: 'EL nombre de la categoria ya existe'});
+                        }
+                    }
+                } else {
+                    res.json({error: 'EL nombre de la categoria ya existe'});
                 }
+
             }
-        }catch(err){
+        } catch (err) {
             res.status(500).json({error: 'Error al obtener categorias'});
         }
     },
 
-    /*
-
-                // Si es un objeto, crear o actualizar un producto
-                const producto = req.body;
-                if (producto.id) {
-                    // Actualizar producto existente
-                    const updatedProducto = await Producto.findOneAndUpdate(
-                        {id: producto.id},
-                        producto,
-                        {new: true, upsert: true}
-                    );
-                    res.json({success: true, producto: updatedProducto});
-                } else {
-                    // Crear nuevo producto
-                    const newProducto = new Producto(producto);
-                    await newProducto.save();
-                    res.json({success: true, producto: newProducto});
-                }
+    getCategoryById: async (req, res) => {
+        try {
+            const category = await Category.findOne({
+                id: parseInt(req.params.id)
+            })
+            if (category) {
+                res.json(category);
+            } else {
+                res.status(404).json({error: 'categoria no encontrada'});
             }
         } catch (error) {
-            console.error('Error al guardar productos:', error);
-            res.status(500).json({error: 'Error al guardar productos'});
+            console.error('Error al obtener categoria:', error);
+            res.status(500).json({error: 'Error al obtener categoria'});
         }
-     */
+    },
+    getCategoryByName: async (req, res) => {
+        try {
+            const category = await Category.findOne({
+                name: req.params.name
+            })
+            if (category) {
+                res.json(category);
+            } else {
+                res.status(404).json({error: 'categoria no encontrada'});
+            }
+        } catch (error) {
+            console.error('Error al obtener categoria:', error);
+            res.status(500).json({error: 'Error al obtener categoria'});
+        }
+    },
+    getDaughtersCategoryById: async (req, res) => {
+        try {
+            const subCategory = await SubCategory.find({
+                category_id: parseInt(req.params.id)
+            })
+            if (subCategory) {
+                res.json(subCategory);
+            } else {
+                res.status(404).json({error: 'Subcategoria no encontrada'});
+            }
+        } catch (error) {
+            console.error('Error al obtener producto:', error);
+            res.status(500).json({error: 'Error al obtener producto'});
+        }
+    },
 
+    deleteCategory: async (req, res) => {
+        try {
+            const result = await Category.findOneAndDelete({
+                id: parseInt(req.params.id)
+            })
+            if (result) {
+                res.json({success: true});
+            } else {
+                res.status(404).json({error: 'categoria no encontrada'});
+            }
+        } catch (error) {
+            console.error('Error al eliminar categoria:', error);
+            res.status(500).json({error: 'Error al eliminar categoria'});
+        }
+    },
+
+    getTreeCategories: async (req, res) => {
+        try {
+            const categories = await Category.find().sort({id: 1});
+
+            const completeTree = await Promise.all(
+                categories.map(async (category) => {
+                    // Obtener subcategorías de esta categoría
+                    const subCategories = await SubCategory.find({
+                        category_id: category.id
+                    }).select('name id');
+
+
+                    console.log(subCategories)
+
+                    // Obtener productos para cada subcategoría
+                    const subCategoriesWithProducts = await Promise.all(
+                        subCategories.map(async (subCategory) => {
+                            const products = await Product.find({
+                                subcategoria_id: subCategory.id
+                            }).select('id nombre precio ');
+
+
+
+                            return {
+                                id: subCategory.id,
+                                name: subCategory.name,
+                                products: products.map(
+                                    product => ({
+                                        id:product.id,
+                                        name: product.nombre,
+                                        precio: product.precio,
+                                    })
+                                )
+                            };
+
+
+                        }))
+
+
+                    return {
+                        id: category.id,
+                        name: category.name,
+                        sub_categories: subCategoriesWithProducts
+                    };
+                })
+
+                //
+                //
+
+                //
+
+                //
+                //             })
+                //         );
+            );
+
+            res.json({
+                success: true,
+                message: 'Árbol completo obtenido exitosamente',
+                data: completeTree
+            });
+
+        } catch (error) {
+            console.error('Error al obtener árbol completo:', error);
+            res.status(500).json({
+                success: false,
+                error: 'Error al obtener el árbol completo'
+            });
+        }
+    }
 }
 
+
 export default CategoryController;
+/*
+            // Obtener subcategorías para cada categoría
+            const categoriesWithSubs = await Promise.all(
+                categories.map(async (category) => {
+                    const subCategories = await SubCategory.find({
+                        category: category._id
+                    }).select('name id'); // Solo los campos necesarios
+
+                    return {
+                        id: category.id,
+                        name: category.name,
+                        sub_categories: subCategories.map(sub => ({
+                            id: sub.id,
+                            name: sub.name
+                        }))
+                    };
+                })
+            );
+
+            res.json({
+                success: true,
+                message: 'Árbol de categorías obtenido exitosamente',
+                count: categoriesWithSubs.length,
+                data: categoriesWithSubs
+            });
+
+        } catch (error) {
+            console.error('Error al obtener árbol de categorías:', error);
+            res.status(500).json({
+                success: false,
+                error: 'Error al obtener el árbol de categorías'
+            });
+        }
+    }*/
+
+/*
+getTreeCategories: async (req, res) => {
+    try {
+        const category = await Category.find().sort({id: 1});
+
+        const subCategory = await SubCategory.find({category_id: category.id})
+
+        const transformedData = category.map(category => ({
+            id: category.id,
+            name: category.name,
+            sub_category: [{}],
+        }));
+
+        res.json({
+            status: 'success',
+            results: transformedData.length,
+            data: {
+                categorias: transformedData
+            },
+            metadata: {
+                version: '1.0',
+                requestId: req.requestId || Math.random().toString(36).substr(2, 9)
+            }
+        });
+
+
+        // res.json({
+        //     success: true,
+        //     message: 'Categorías obtenidas exitosamente',
+        //     count: category.length,
+        //     timestamp: new Date().toISOString(),
+        //     data: category
+        // });
+    } catch (error) {
+        console.error('Error al obtener productos:', error);
+        res.status(500).json({error: 'Error al obtener productos'});
+    }
+}*/
+
+

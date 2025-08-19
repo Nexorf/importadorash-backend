@@ -6,7 +6,7 @@ const productSchema = new mongoose.Schema({
   descripcion: String,
   descripcionDetallada: String,
   precio: { type: Number, required: [true, 'El precio es obligatorio'] },
-  categoria: String,
+  subcategoria_id: Number,
   imagen: String,
   stock: { type: Number, default: 0 },
   destacado: { type: Boolean, default: false },
@@ -14,7 +14,17 @@ const productSchema = new mongoose.Schema({
   especificaciones: [String],
   marca: String,
   garantia: String,
-  fechaCreacion: { type: Date, default: Date.now }
+  images: [{
+    type: String,
+    validate: {
+      validator: function(url) {
+        return /^https?:\/\/.+\..+$/.test(url);
+      },
+      message: 'URL de imagen inválida'
+    }
+  }]
+}, {
+  timestamps: true
 });
 
 // Middleware para asignar un ID automáticamente antes de guardar

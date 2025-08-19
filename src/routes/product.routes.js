@@ -4,7 +4,7 @@ import ProductController from "../controllers/product.controller.js";
 
 const router = Router();
 /**
- * @openapi
+ *
  * tags:
  *   name: Products
  *   description: API para gestionar productos
