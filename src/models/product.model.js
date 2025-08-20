@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 
 const productSchema = new mongoose.Schema({
   id: Number,
+
   nombre: { type: String, required: [true, 'El nombre es obligatorio'] },
   descripcion: String,
   descripcionDetallada: String,
@@ -14,7 +15,7 @@ const productSchema = new mongoose.Schema({
   especificaciones: [String],
   marca: String,
   garantia: String,
-  images: [{
+  url: {
     type: String,
     validate: {
       validator: function(url) {
@@ -22,7 +23,10 @@ const productSchema = new mongoose.Schema({
       },
       message: 'URL de imagen inválida'
     }
-  }]
+  },
+  feature: Boolean,
+  code: String,
+  discount_pct: Number,
 }, {
   timestamps: true
 });

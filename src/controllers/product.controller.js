@@ -4,7 +4,7 @@ const ProductController = {
     getProducts: async (req, res) => {
         try {
             const productos = await Producto.find().sort({id: 1});
-            res.json(productos);
+            res.response.success(res, 'PRODUCTOS',productos);
         } catch (error) {
             console.error('Error al obtener productos:', error);
             res.status(500).json({error: 'Error al obtener productos'});
