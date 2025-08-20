@@ -1,6 +1,5 @@
 import Category from '../models/category.model.js';
 import SubCategory from "../models/subcategory.model.js";
-import Producto from "../models/product.model.js";
 import Product from "../models/product.model.js";
 
 const CategoryController = {
@@ -8,7 +7,7 @@ const CategoryController = {
     getAllCategory: async (req, res) => {
         try {
             const category = await Category.find().sort({id: 1});
-            res.response.success(res,"PRODUCTOS",category );
+            res.response.success(res, "PRODUCTOS", category);
         } catch (error) {
             res.response.serverError(res, 'Error al obtener categorias', error);
         }
@@ -32,25 +31,24 @@ const CategoryController = {
                             category,
                             {new: true, upsert: true}
                         );
-                        res.json({success: true, category: updatedCategory});
+                        res.response.success(res, 'Categoria Creada', updatedCategory);
                     } else {
                         if (!categories) {
-                            console.error('Categoria no existe');
                             const newCategory = new Category(category);
                             await newCategory.save();
-                            res.json({success: true, category: newCategory});
+                            res.response.success(res, 'Categoria Creada', newCategory);
 
                         } else {
-                            res.json({error: 'EL nombre de la categoria ya existe'});
+                            res.response.success(res, 'EL nombre de la categoria ya existe', null)
                         }
                     }
                 } else {
-                    res.json({error: 'EL nombre de la categoria ya existe'});
+                    res.response.success(res, 'EL nombre de la categoria ya existe', null)
                 }
 
             }
         } catch (err) {
-            res.status(500).json({error: 'Error al obtener categorias'});
+            res.response.serverError(res, 'Error al crear categorias', err);
         }
     },
 
@@ -106,16 +104,42 @@ const CategoryController = {
                 id: parseInt(req.params.id)
             })
             if (result) {
-                res.json({success: true});
+                res.response.success(res, 'Categoria Creada', result);
             } else {
-                res.status(404).json({error: 'categoria no encontrada'});
+                res.response.notFound(res, 'Categoria no encontrada', null);
             }
         } catch (error) {
-            console.error('Error al eliminar categoria:', error);
-            res.status(500).json({error: 'Error al eliminar categoria'});
+            res.response.serverError(res, 'Error al eliminar categoria', error);
         }
     },
 
+    getTreeCategoriesAndSubCategories: async (req, res) => {
+        try {
+            const categories = await Category.find().sort({id: 1});
+
+            const completeTree = await Promise.all(
+                categories.map(async (category) => {
+
+                    const subCategories = await SubCategory.find({
+                        category_id: category.id
+                    }).select('id name');
+
+                    return {
+                        _id: category._id,
+                        id: category.id,
+                        name: category.name,
+                        sub_categories: subCategories
+                    };
+                })
+            )
+
+
+            res.response.success(res, 'ARBOL', completeTree);
+        } catch (error) {
+            res.response.serverError(res, 'Error al eliminar categoria', error);
+        }
+
+    },
     getTreeCategories: async (req, res) => {
         try {
             const categories = await Category.find().sort({id: 1});
@@ -138,13 +162,12 @@ const CategoryController = {
                             }).select('id nombre precio ');
 
 
-
                             return {
                                 id: subCategory.id,
                                 name: subCategory.name,
                                 products: products.map(
                                     product => ({
-                                        id:product.id,
+                                        id: product.id,
                                         name: product.nombre,
                                         precio: product.precio,
                                     })
@@ -161,15 +184,6 @@ const CategoryController = {
                         sub_categories: subCategoriesWithProducts
                     };
                 })
-
-                //
-                //
-
-                //
-
-                //
-                //             })
-                //         );
             );
 
             res.json({
