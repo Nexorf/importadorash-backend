@@ -56,23 +56,6 @@ const ProductController = {
         }
     },
 
-    updateProduct: async (req, res) => {
-        try {
-            const updatedProducto = await Producto.findOneAndUpdate(
-                {id: parseInt(req.params.id)},
-                req.body,
-                {new: true}
-            );
-            if (updatedProducto) {
-                res.json({success: true, producto: updatedProducto});
-            } else {
-                res.status(404).json({error: 'Producto no encontrado'});
-            }
-        } catch (error) {
-            console.error('Error al actualizar producto:', error);
-            res.status(500).json({error: 'Error al actualizar producto'});
-        }
-    },
 
     deleteProduct: async (req, res) => {
         try {
@@ -86,6 +69,9 @@ const ProductController = {
             console.error('Error al eliminar producto:', error);
             res.status(500).json({error: 'Error al eliminar producto'});
         }
-    }
+    },
+
+
+
 };
 export default ProductController;
