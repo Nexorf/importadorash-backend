@@ -8,11 +8,6 @@ const subCategorySchema = new mongoose.Schema({
         trim: true,
     },
     category_id: Number,
-    // category: {
-    //     type: mongoose.Schema.Types.ObjectId,
-    //     ref: 'Category',
-    //     required: [true, 'La categoría padre es obligatoria']
-    // }
 }, {
     timestamps: true
 });

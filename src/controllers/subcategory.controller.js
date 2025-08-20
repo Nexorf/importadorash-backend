@@ -1,4 +1,5 @@
 import SubCategory from '../models/subcategory.model.js';
+import Product from '../models/product.model.js';
 
 
 const SubcategoryController = {
@@ -60,82 +61,34 @@ const SubcategoryController = {
         }
     },
 
-
-    /*
-        getAllSubCategories: async function (req, res) {
-            try {
-                const subcategories = await SubCategory.find();
-                res.status(200).json(subcategories);
-
-            } catch (err) {
-                res.status(500).json({error: 'Error al obtener subcategory'});
+    getDaughtersProductsById : async (req, res) => {
+        try {
+            const products = await Product.find({
+                subcategoria_id: parseInt(req.params.id)
+            })
+            if(products){
+                res.response.success(res,"SUB CATEGORIA CON HIJOS", products);
+            }else{
+                res.response.notFound(res,"NO INFORMACION", null);
             }
-        },
 
-        createSubCategories: async function (req, res) {
-            try {
-                const {name, category} = req.body;
-
-                // Validaciones básicas
-                if (!name || !category) {
-                    return res.status(400).json({
-                        error: 'Nombre y categoría son obligatorios'
-                    });
-                }
-
-                // Verificar que la categoría exista
-                const categoryExists = await Category.findById(category);
-                if (!categoryExists) {
-
-                    return res.status(404).json({
-                        error: 'La categoría especificada no existe'
-                    });
-                }
-
-                // Verificar si ya existe la subcategoría en esta categoría
-                const existingSubCategory = await SubCategory.findOne({
-                    name: name.trim(),
-                    category: category
-                });
-
-                if (existingSubCategory) {
-                    return res.status(409).json({
-                        error: 'Ya existe una subcategoría con este nombre en la categoría especificada'
-                    });
-                }
-
-                // Crear nueva subcategoría
-                const newSubCategory = new SubCategory({
-                    name: name.trim(),
-                    category: category
-                });
-
-                await newSubCategory.save();
-
-                // Populate para devolver datos completos
-                await newSubCategory.populate('category', 'name');
-
-                res.status(201).json({
-                    success: true,
-                    message: 'Subcategoría creada exitosamente',
-                    data: newSubCategory
-                });
-
-            } catch (err) {
-                console.error('Error en createSubCategory:', err);
-
-                if (err.name === 'ValidationError') {
-                    const errors = Object.values(err.errors).map(e => e.message);
-                    return res.status(400).json({errors});
-                }
-
-                res.status(500).json({
-                    error: 'Error interno del servidor al crear subcategoría',
-                    details: process.env.NODE_ENV === 'development' ? err.message : undefined
-                });
-            }
+        } catch (error) {
+            res.response.serverError(res,null,null)
         }
-    */
+    },
 }
+/*
+getDaughtersCategoryById: async (req, res) => {
+        try {
+            const subCategory = await SubCategory.find({
+                category_id: parseInt(req.params.id)
+            })
+            if (subCategory) {
+                res.json(subCategory);
+            } else {
+                res.status(404).json({error: 'Subcategoria no encontrada'});
+            }
 
+    },
+ */
 export default SubcategoryController;

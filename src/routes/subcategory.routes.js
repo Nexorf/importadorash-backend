@@ -7,6 +7,7 @@ const router = Router();
 router.get('/', SubCategoryController.getAllSubCategory);
 router.post('/', SubCategoryController.createSubCategory)
 router.delete('/:id', SubCategoryController.deleteSubCategory);
+router.get('/daughters/:id', SubCategoryController.getDaughtersProductsById);
 
 
 export default router;
