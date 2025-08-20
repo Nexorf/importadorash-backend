@@ -8,9 +8,9 @@ const CategoryController = {
     getAllCategory: async (req, res) => {
         try {
             const category = await Category.find().sort({id: 1});
-            res.json(category);
-        } catch (err) {
-            res.status(500).json({error: 'Error al obtener categorias'});
+            res.response.success(res,"PRODUCTOS",category );
+        } catch (error) {
+            res.response.serverError(res, 'Error al obtener categorias', error);
         }
     },
 

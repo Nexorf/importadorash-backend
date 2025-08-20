@@ -1,5 +1,6 @@
 import SubCategory from '../models/subcategory.model.js';
 import Product from '../models/product.model.js';
+import Category from "../models/category.model.js";
 
 
 const SubcategoryController = {
@@ -76,6 +77,29 @@ const SubcategoryController = {
             res.response.serverError(res,null,null)
         }
     },
+
+    getSubCategoriesByNameCategory : async (req, res) => {
+        try{
+
+            const category = await Category.findOne({
+                name: req.params.name
+            })
+            if(category){
+                const subCategory= await SubCategory.find({
+                    category_id: category.id
+                })
+                res.response.success(res,category.name,subCategory );
+            }
+
+
+            // if(subCategory){
+            //     res.json(subCategory);
+            // }
+            //Electronica
+        } catch (error) {
+            res.response.serverError(res, 'Error al obtener la Sub categorias', error);
+        }
+    }
 }
 /*
 getDaughtersCategoryById: async (req, res) => {

@@ -5,11 +5,13 @@ import checkRole from "../middleware/roles.js";
 
 const router = Router();
 
-// Rutas CORREGIDAS
+// Rutas Productos
 router.get("/", ProductController.getProducts);
-router.get("/:id", ProductController.getProductById);
-router.post("/", ProductController.createProduct);
-// router.put("/:id", ProductController.updateProduct);
+router.get("/id/:id", ProductController.getProductById);
+router.get("/bysubcategory/:name", ProductController.getProductBySubCategoryName);
+
+// Rutas para unicamente el usuari
+router.post("/", verifyToken, checkRole(['admin']), ProductController.createProduct);
 router.delete("/:id", verifyToken, checkRole(['admin']), ProductController.deleteProduct);
 
 export default router;   // 👈 exportación por defecto
