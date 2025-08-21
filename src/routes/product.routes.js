@@ -8,9 +8,8 @@ const router = Router();
 // Rutas Productos
 router.get("/", ProductController.getProducts);
 router.get("/id/:id", ProductController.getProductById);
-router.get("/bysubcategory/:name", ProductController.getProductBySubCategoryName);
+router.get("/bysubcategory", ProductController.getProductBySubCategory);
 
-// Rutas para unicamente el usuari
 router.post("/", verifyToken, checkRole(['admin']), ProductController.createProduct);
 router.delete("/:id", verifyToken, checkRole(['admin']), ProductController.deleteProduct);
 

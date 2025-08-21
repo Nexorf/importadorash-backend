@@ -6,8 +6,74 @@ const CategoryController = {
 
     getAllCategory: async (req, res) => {
         try {
-            const category = await Category.find().sort({id: 1});
-            res.response.success(res, "PRODUCTOS", category);
+            const {
+                page = 1,
+                limit = 10,
+                sort = 'id',
+                order = 'asc',
+                name,
+                id,
+                search
+            } = req.query;
+
+
+            // Construir objeto de filtros
+            const filtros = {};
+
+            // Filtro por nombre (búsqueda parcial)
+            if (name) {
+                filtros.name = {$regex: name, $options: 'i'}; // Case insensitive
+            }
+
+            if (id) {
+                filtros.id = { $gte: Number(id) };
+            }
+
+            // Búsqueda general en múltiples campos
+            if (search) {
+                filtros.$or = [
+                    {name: {$regex: search, $options: 'i'}},
+                ];
+            }
+
+            // Configurar ordenamiento
+            const sortOrder = order.toLowerCase() === 'desc' ? -1 : 1;
+            const sortOptions = {[sort]: sortOrder};
+
+            // Calcular paginación
+            const skip = (page - 1) * limit;
+            const total = await Category.countDocuments(filtros);
+
+
+            const category = await Category.find(filtros)
+                .sort(sortOptions)
+                .skip(skip)
+                .limit(Number(limit))
+                .select('-__v -_id');
+
+            // Metadata de paginación
+            const pagination = {
+                page: Number(page),
+                limit: Number(limit),
+                total,
+                pages: Math.ceil(total / limit),
+                hasNext: page < Math.ceil(total / limit),
+                hasPrev: page > 1
+            };
+
+            res.response.success(
+                res,
+                "PRODUCTOS",
+                {
+                    category,
+                    page,
+                    filtros: Object.keys(filtros).length > 0 ? filtros : undefined
+                },
+                {
+                    total: category.length,
+                    user: req.user ? {id: req.user.id, role: req.user.role} : null
+                }
+            );
         } catch (error) {
             res.response.serverError(res, 'Error al obtener categorias', error);
         }

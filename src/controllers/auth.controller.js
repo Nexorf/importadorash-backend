@@ -3,18 +3,22 @@
 import jwt from "jsonwebtoken";
 
 const JWT_SECRET = process.env.JWT_SECRET || 'mi_clave_secreta_super_segura';
+const USERNAME = process.env.USERNAME || 'admin';
+const USERNAME_USER = process.env.USERNAME_USER || 'user';
+const PASSWORD = process.env.PASSWORD || 'admin';
+
 
 const usuario = [
     {
         id: 1,
-        username: 'admin',
-        password: 'admin',
+        username: USERNAME,
+        password: PASSWORD,
         role: 'admin'
     },
     {
         id: 2,
-        username: 'user',
-        password: 'admin',
+        username: USERNAME_USER,
+        password: PASSWORD,
         role: 'user'
     }
 
