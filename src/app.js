@@ -1,4 +1,5 @@
 import express from "express";
+import cors from "cors";
 import connectDB from "./config/db.js";
 import productRoutes from "./routes/product.routes.js";
 import categoryRoutes from "./routes/category.routes.js";
@@ -10,6 +11,13 @@ import {responseMiddleware} from "./utils/responsehandler.js";
 const app = express();
 
 app.use(express.json());
+app.use(cors(
+    {
+        origin: '*',
+        methods: ['GET', 'POST', 'DELETE', 'PUT'],
+        allowedHeaders: ['Content-Type', 'Authorization'],
+    }
+));
 
 app.use(responseMiddleware)
 
@@ -27,6 +35,6 @@ app.use("/api/v1/auth", authRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
-  console.log(`📖 Swagger listo en http://localhost:${PORT}/api-docs`);
+    console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
+    console.log(`📖 Swagger listo en http://localhost:${PORT}/api-docs`);
 });

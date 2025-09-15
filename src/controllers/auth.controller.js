@@ -3,9 +3,8 @@
 import jwt from "jsonwebtoken";
 
 const JWT_SECRET = process.env.JWT_SECRET || 'mi_clave_secreta_super_segura';
-const USERNAME = process.env.USERNAME || 'admin';
-const USERNAME_USER = process.env.USERNAME_USER || 'user';
-const PASSWORD = process.env.PASSWORD || 'admin';
+const USERNAME = 'admin@importadorash.com';
+const PASSWORD = 'ImportadoraSH2025';
 
 
 const usuario = [
@@ -15,12 +14,6 @@ const usuario = [
         password: PASSWORD,
         role: 'admin'
     },
-    {
-        id: 2,
-        username: USERNAME_USER,
-        password: PASSWORD,
-        role: 'user'
-    }
 
 ]
 
@@ -42,7 +35,7 @@ const AuthController = {
             }
 
             if (user.password !== password) {
-                return res.response.notFound(res, 'Usuario o Contraseña incorrecta');
+                return res.response.notFound(res, '  Contraseña incorrecta');
             }
 
             const token = jwt.sign(
@@ -55,7 +48,7 @@ const AuthController = {
                 {expiresIn: '1h'}
             );
 
-            res.response.success(res,'Login exitoso', token );
+            res.response.success(res, 'Login exitoso', token);
 
         } catch (error) {
             console.log(error);

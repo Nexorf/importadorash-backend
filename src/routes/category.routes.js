@@ -5,7 +5,6 @@ import checkRole from "../middleware/roles.js";
 
 const router = Router();
 
-// Rutas Categorias
 router.get('/', CategoryController.getAllCategory)
 router.get('/id/:id', CategoryController.getCategoryById)
 router.get('/tree', CategoryController.getTreeCategoriesAndSubCategories)

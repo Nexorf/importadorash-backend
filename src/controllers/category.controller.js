@@ -163,11 +163,17 @@ const CategoryController = {
 
     deleteCategory: async (req, res) => {
         try {
-            const result = await Category.findOneAndDelete({
-                id: parseInt(req.params.id)
-            })
+            const catId = parseInt(req.params.id);
+            const result = await Category.findOneAndDelete({id: catId})
             if (result) {
-                res.response.success(res, 'Categoria Creada', result);
+                const subs = await SubCategory.find({category_id: catId}).select('id');
+                const subIds = subs.map(s => s.id);
+                await SubCategory.deleteMany({category_id: catId});
+                await Product.updateMany({subcategoria_id: {$in: subIds}}, {$set: {subcategoria_id: null}});
+                res.response.success(res, 'Categoria eliminada', {
+                    category: result,
+                    removedSubcategories: subIds.length,
+                })
             } else {
                 res.response.notFound(res, 'Categoria no encontrada', null);
             }
